@@ -1,0 +1,44 @@
+CREATE DATABASE GOODVIBESDB
+
+CREATE TABLE SONG_DATA (
+	id int IDENTITY(1,1),
+	song_url varchar(255) not null,
+	song_name varchar(150) null,
+	song_artist varchar(150) null,
+	username varchar(100) not null,
+	playlist_name varchar(100) null,
+	playlist_id int null,
+	duration varchar(20) null,
+	creation_date DATE DEFAULT GETDATE()
+	)
+
+create table users(
+userid int identity(1,1),
+username varchar(100) not null,
+password varchar(255) not null,
+email varchar(255) not null,
+CONSTRAINT u_username UNIQUE(username),
+CONSTRAINT u_email UNIQUE(email)
+)
+
+create table playlists(
+playlist_id int identity(1,1),
+playlist_name varchar(100) not null,
+username varchar(100) not null
+)
+alter table playlists add deletable bit default 1
+
+insert into playlists (playlist_name, username) values ('Jarkon lista', 'JSK')
+
+
+INSERT INTO song_data (song_url, song_name, song_artist, username, playlist_name, playlist_id, duration)
+VALUES ('https://www.youtube.com/apiplayer?video_id=tvjRPt749ZE', 'test','test', 'JSK','soittolistan nimi', 1, '3:53')
+
+INSERT INTO song_data (song_url, song_name, song_artist, username, playlist_name, playlist_id, duration)
+VALUES ('tvjRPt749ZE', 'Shake Drop On Video','White Panda', 'JSK','Default', 0, '3:19')
+
+INSERT INTO song_data (song_url, song_name, song_artist, username, playlist_name, playlist_id, duration)
+VALUES ('Of-lpfsBR8U', 'Gravel Pit','Wu-Tang Clan', 'JSK','Default', 0, '5:59')
+
+INSERT INTO song_data (song_url, song_name, song_artist, username, playlist_name, playlist_id, duration)
+VALUES ('PBwAxmrE194', 'C.R.E.A.M','Wu-Tang Clan', 'JSK','Default', 0, '4:00')
