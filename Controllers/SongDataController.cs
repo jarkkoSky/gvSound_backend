@@ -73,7 +73,7 @@ namespace GoodVibesWeb.Controllers
                 using (SqlConnection sc = new SqlConnection(sConn))
                 {
                     sc.Open();
-                    string sql = "SELECT song_url, song_artist, song_name, id, creation_date, UPPER(username) as username FROM dbo.song_data where playlist_id = @playlist_id order by creation_date desc";
+                    string sql = "SELECT song_url, song_artist, song_name, id, creation_date, UPPER(username) as username, source, permaurl FROM dbo.song_data where playlist_id = @playlist_id order by creation_date desc";
                     SqlCommand com = new SqlCommand(sql, sc);
                     com.Parameters.AddWithValue("@username", username);
                     com.Parameters.AddWithValue("@playlist_id", playlist_id);
@@ -89,6 +89,8 @@ namespace GoodVibesWeb.Controllers
                             song.id = int.Parse(reader["id"].ToString());
                             song.song_added = (DateTime)reader["creation_date"];
                             song.username = reader["username"].ToString();
+                            song.source = reader["source"].ToString();
+                            song.permaurl = reader["permaurl"].ToString();
                             playlist.Add(song);
                         }
                     }
@@ -158,61 +160,52 @@ namespace GoodVibesWeb.Controllers
         {
             HttpResponseMessage response;
 
-
-            if (s.song_url.Length != 11)
+            try
             {
-                response = Request.CreateResponse(HttpStatusCode.BadRequest);
-                response.Content = new StringContent("Video ID invalid. Must be 11 characters", Encoding.UTF8, "application/json");
-                response.Headers.Add("Access-Control-Allow-Origin", "*");
+                using (SqlConnection sc = new SqlConnection(sConn))
+                {
+                    sc.Open();
+                    string sql = "select song_url from song_data where playlist_id = @playlist_id and song_url = @song_url";
+                    SqlCommand com = new SqlCommand(sql, sc);
+                    com.Parameters.AddWithValue("@playlist_id", playlist_id);
+                    com.Parameters.AddWithValue("@song_url", s.song_url);
+                    object o = com.ExecuteScalar();
+                    if (o == null)
+                    {
+                        sql = "Insert into song_data (song_url,song_name,song_artist,username, playlist_id, source, permaurl) values (@song_url,@song_name,@song_artist,@username,@playlist_id, @source, @permaurl)";
+                        com = new SqlCommand(sql, sc);
+                        com.Parameters.AddWithValue("@song_url", s.song_url);
+                        com.Parameters.AddWithValue("@song_name", s.song_name);
+                        com.Parameters.AddWithValue("@song_artist", s.song_artist);
+                        com.Parameters.AddWithValue("@username", username);
+                        com.Parameters.AddWithValue("@playlist_id", playlist_id);
+                        com.Parameters.AddWithValue("@source", s.source);
+                        com.Parameters.AddWithValue("@permaurl", s.permaurl);
+
+                        com.ExecuteNonQuery();
+                    }
+                    else
+                    {
+                        response = Request.CreateResponse(HttpStatusCode.BadRequest);
+                        response.Content = new StringContent("Song already exists in this playlist", Encoding.UTF8, "application/json");
+                        response.Headers.Add("Access-Control-Allow-Origin", "*");
+
+                        return response;
+                    }
+                }
+                response = Request.CreateResponse(HttpStatusCode.OK);
+                Response r = new Response("success", "Song Added");
+                response.Content = new StringContent(JsonConvert.SerializeObject(r), Encoding.UTF8, "application/json");
 
                 return response;
             }
-            else
+            catch (Exception ex)
             {
-                try
-                {
-                    using (SqlConnection sc = new SqlConnection(sConn))
-                    {
-                        sc.Open();
-                        string sql = "select song_url from song_data where playlist_id = @playlist_id and song_url = @song_url";
-                        SqlCommand com = new SqlCommand(sql, sc);
-                        com.Parameters.AddWithValue("@playlist_id", playlist_id);
-                        com.Parameters.AddWithValue("@song_url", s.song_url);
-                        object o = com.ExecuteScalar();
-                        if (o == null)
-                        {
-                            sql = "Insert into song_data (song_url,song_name,song_artist,username, playlist_id) values (@song_url,@song_name,@song_artist,@username,@playlist_id)";
-                            com = new SqlCommand(sql, sc);
-                            com.Parameters.AddWithValue("@song_url", s.song_url);
-                            com.Parameters.AddWithValue("@song_name", s.song_name);
-                            com.Parameters.AddWithValue("@song_artist", s.song_artist);
-                            com.Parameters.AddWithValue("@username", username);
-                            com.Parameters.AddWithValue("@playlist_id", playlist_id);
-                            com.ExecuteNonQuery();
-                        }
-                        else
-                        {
-                            response = Request.CreateResponse(HttpStatusCode.BadRequest);
-                            response.Content = new StringContent("Song already exists in this playlist", Encoding.UTF8, "application/json");
-                            response.Headers.Add("Access-Control-Allow-Origin", "*");
+                response = Request.CreateResponse(HttpStatusCode.BadRequest);
+                response.Content = new StringContent("Error occured while adding song, try again!" + ex.Message, Encoding.UTF8, "application/json");
+                response.Headers.Add("Access-Control-Allow-Origin", "*");
 
-                            return response;
-                        }
-                    }
-                    response = Request.CreateResponse(HttpStatusCode.OK);
-                    Response r = new Response("success", "Song Added");
-                    response.Content = new StringContent(JsonConvert.SerializeObject(r), Encoding.UTF8, "application/json");
-
-                    return response;
-                }
-                catch (Exception ex)
-                {
-                    response = Request.CreateResponse(HttpStatusCode.BadRequest);
-                    response.Content = new StringContent("Error occured while adding song, try again!" + ex.Message, Encoding.UTF8, "application/json");
-                    response.Headers.Add("Access-Control-Allow-Origin", "*");
-
-                    return response;
-                }
+                return response;
             }
         }
 

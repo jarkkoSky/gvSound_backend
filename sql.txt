@@ -6,6 +6,8 @@ CREATE TABLE SONG_DATA (
 	song_name varchar(150) null,
 	song_artist varchar(150) null,
 	username varchar(100) not null,
+	source varchar(50) not null,
+	permaurl varchar(255) null,
 	playlist_name varchar(100) null,
 	playlist_id int null,
 	duration varchar(20) null,

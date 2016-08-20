@@ -189,6 +189,7 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AuthController.cs" />
     <Compile Include="Controllers\SongDataController.cs" />
+    <Compile Include="Controllers\SoundCloudDataController.cs" />
     <Compile Include="Controllers\YoutubeDataController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

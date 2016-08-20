@@ -42,6 +42,7 @@ namespace GoodVibesWeb.Controllers
                     Song s = new Song();
                     s.title = searchResult.Snippet.Title;
                     s.song_url = searchResult.Id.VideoId;
+                    s.source = "youtube";
                     videos.Add(s);
                 }
             }
