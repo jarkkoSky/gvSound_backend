@@ -1,6 +1,6 @@
 Backend for the gvSound web application
 
-This backend is built on .Net 4.6 web api and acts as a REST Api for the frontend
+This backend is built on .Net 4.6 web api
 
 To run this project you need:
 
