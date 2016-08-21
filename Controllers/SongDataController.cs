@@ -180,8 +180,14 @@ namespace GoodVibesWeb.Controllers
                         com.Parameters.AddWithValue("@username", username);
                         com.Parameters.AddWithValue("@playlist_id", playlist_id);
                         com.Parameters.AddWithValue("@source", s.source);
-                        com.Parameters.AddWithValue("@permaurl", s.permaurl);
-
+                        if (s.source == "soundcloud")
+                        {
+                            com.Parameters.AddWithValue("@permaurl", s.permaurl);
+                        }
+                        else
+                        {
+                            com.Parameters.AddWithValue("@permaurl", "no url provided");
+                        }
                         com.ExecuteNonQuery();
                     }
                     else
