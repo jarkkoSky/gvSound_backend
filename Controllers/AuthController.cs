@@ -1,4 +1,5 @@
 ﻿using GoodVibesWeb.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -41,14 +42,9 @@ namespace GoodVibesWeb.Controllers
 
                 if (hashedpassword == passwordfromdb)
                 {
-                    HttpResponseMessage respMessage = new HttpResponseMessage();
-                    respMessage.Content = new ObjectContent<string[]>(new string[] { "Auth", "success" }, new JsonMediaTypeFormatter());
-                    CookieHeaderValue cookie = new CookieHeaderValue("username", u.username);
-                    cookie.Expires = DateTimeOffset.Now.AddDays(1);
-                    cookie.Domain = Request.RequestUri.Host;
-                    cookie.Path = "/";
-                    respMessage.Headers.AddCookies(new CookieHeaderValue[] { cookie });
-                    return respMessage;
+                    HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.OK);
+                    response.Content = new StringContent(Base64Encode(u.username), Encoding.UTF8, "application/json");
+                    return response;
                 }
                 else
                 {
@@ -65,6 +61,11 @@ namespace GoodVibesWeb.Controllers
             }
         }
 
+        public static string Base64Encode(string plainText)
+        {
+            var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
+            return System.Convert.ToBase64String(plainTextBytes);
+        }
 
         [Route("api/createuser")]
         [HttpPost]

@@ -18,13 +18,19 @@ namespace GoodVibesWeb.Controllers
     {
         string sConn =
             ServerData.sconn;
-
+        public static string Base64Decode(string base64EncodedData)
+        {
+            var base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData);
+            return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
+        }
         [Route("api/getplaylists/{username}/")]
         [HttpGet]
         public HttpResponseMessage GetPlaylists(string username)
         {
             string result;
             List<Playlist> playlists = new List<Playlist>();
+            username = Base64Decode(username);
+
             try
             {
                 using (SqlConnection sc = new SqlConnection(sConn))
@@ -67,6 +73,7 @@ namespace GoodVibesWeb.Controllers
         {
             string result;
             List<Song> playlist = new List<Song>();
+            username = Base64Decode(username);
 
             try
             {
@@ -117,6 +124,7 @@ namespace GoodVibesWeb.Controllers
             try
             {
                 int playlist_id;
+                username = Base64Decode(username);
 
                 using (SqlConnection sc = new SqlConnection(sConn))
                 {
@@ -159,6 +167,7 @@ namespace GoodVibesWeb.Controllers
         public HttpResponseMessage Post(Song s, string username, int playlist_id)
         {
             HttpResponseMessage response;
+            username = Base64Decode(username);
 
             try
             {
@@ -219,6 +228,8 @@ namespace GoodVibesWeb.Controllers
         [HttpDelete]
         public HttpResponseMessage DeletePlaylist(string username, string playlist_id)
         {
+            username = Base64Decode(username);
+
             try
             {
                 using (SqlConnection sc = new SqlConnection(sConn))
